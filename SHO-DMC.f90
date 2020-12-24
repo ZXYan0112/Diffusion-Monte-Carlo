@@ -24,6 +24,8 @@ program dmc_ho
    call CPU_TIME(time_begin)
    call random_seed ()
 
+   open (77, File = 'SHO_DMC_results.log')
+
    E_trial = E0
 
    allocate(x(num,ndim))
@@ -138,6 +140,7 @@ program dmc_ho
    deallocate(x)
    deallocate(x_store)
   
+   close(77)
 
    call CPU_TIME(time_end)
 
