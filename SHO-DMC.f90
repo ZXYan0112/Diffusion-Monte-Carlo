@@ -2,14 +2,21 @@ program dmc_ho
 
    implicit none
 
-   integer, parameter :: num = 300, ndim = 1
-   integer, parameter :: nwalker_aim = 300
-   integer, parameter :: mc_steps = 4000
+   integer, parameter :: num = 3000, ndim = 1
+   integer, parameter :: nwalker_aim = 3000
+   integer, parameter :: mc_steps = 10000
    real(8), parameter :: x_max = 1.0d0
    real(8), parameter :: alpha = 0.1d0
    real(8), parameter :: gamma1 = 0.5d0
    real(8), parameter :: tau = 0.05d0
    real(8), parameter :: E0 = 0.5d0
+
+   !---Use for plotting wave function---!
+   real(8), parameter :: p_range = 5.0d0
+   integer, parameter :: p_bin = 500
+   integer :: p_dist(p_bin) = 0
+   real(8) :: dist = 0.0d0
+   integer :: ibin
  
    integer :: nw(mc_steps) = 0
    real(8) :: walkerV(mc_steps) = 0.0d0
@@ -25,7 +32,14 @@ program dmc_ho
    call random_seed ()
 
    open (77, File = 'SHO_DMC_results.log')
-
+   write(77,*), "System Parameters:"
+   write(77,*), "Aiming Numbers of walker = ", nwalker_aim
+   write(77,*), "Initial Numbers of walker = ", num
+   write(77,*), "Diffusion parameter = ", gamma1
+   write(77,*), "Time step = ", tau
+   write(77,*), "Gaussed Trial Energy =", E0
+   write(77,*), "Trial Energy adjustable parameter = ", alpha
+   
    E_trial = E0
 
    allocate(x(num,ndim))
@@ -69,6 +83,11 @@ program dmc_ho
           s(iwalker) = 1
         endif
       endif
+   
+      !---Produce more walkers--!
+      !---Comment it if you do not want to use it---!
+      s(iwalker) = int(q(iwalker)+tmp)
+
     enddo
     print *, "Shifting walkers and Evaluations of q(and s) have been done at istep =", istep
 
@@ -123,10 +142,10 @@ program dmc_ho
      enddo
     enddo
 
-    !Update E_trial
-    !E_trial = E0 + alpha*log((nwalker_aim*1.0d0/nwalker))
-
-    E_trial = sum(v_vec)/nwalker - alpha*(nwalker-nwalker_aim)*1.0d0/(nwalker_aim)
+    !---Two ways to Update Trial Energy ---!
+    E_trial = E0 + alpha*log((nwalker_aim*1.0d0/nwalker))
+    !E_trial = sum(v_vec)/nwalker - alpha*(nwalker-nwalker_aim)*1.0d0/(nwalker_aim)
+   
     print *, "Current Trial Energy is", E_trial
     walkerV(istep) = E_trial
 
@@ -137,11 +156,25 @@ program dmc_ho
 
    enddo
 
+   p_dist(:) = 0
+   do iwalker = 1, nwalker
+     dist = sqrt(dot_product(x(iwalker,:),x(iwalker,:)))
+
+     ibin = int(dist/(p_range/p_bin*1.0)) + 1
+     if (ibin > p_bin) ibin = p_bin
+
+     p_dist(ibin) = p_dist(ibin) + 1
+   enddo
+
    deallocate(x)
    deallocate(x_store)
-  
-   close(77)
+ 
+   close(77) 
 
+   open (88, File = 'SHO_DMC_wavefunction.log')
+   do ibin = 1, p_bin
+     write(88,*), ibin*(p_range/p_bin), p_dist(ibin)
+   enddo
    call CPU_TIME(time_end)
 
    !--------The results--------
