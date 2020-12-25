@@ -143,7 +143,7 @@ program dmc_ho
     enddo
 
     !---Two ways to Update Trial Energy ---!
-    E_trial = E0 + alpha*log((nwalker_aim*1.0d0/nwalker))
+    E_trial = E_trial + alpha*log((nwalker_aim*1.0d0/nwalker))
     !E_trial = sum(v_vec)/nwalker - alpha*(nwalker-nwalker_aim)*1.0d0/(nwalker_aim)
    
     print *, "Current Trial Energy is", E_trial
