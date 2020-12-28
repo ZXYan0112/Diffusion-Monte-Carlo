@@ -11,4 +11,4 @@ To use this code, just simply type as follows:
  
  ./a.out
  
-The results of energy will be printed on the screen and written in file 'SHO_DMC_results.log', while the data of wave function will be written in file 'SHO_DMC_results.log'.
+The results of energy will be printed on the screen and written in file 'SHO_DMC_(GF_)results.log', while the data of wave function will be written in file 'SHO_DMC_wavefunction.log'.
